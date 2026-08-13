@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Antrian - RSU Santa Elisabeth</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="display-body">
+  <div id="fatalError" class="fatal-error hidden"></div>
+  <header class="display-header">
+    <div class="brand">
+      <span class="brand-title">RSU Santa Elisabeth</span>
+      <span class="brand-sub" id="counterLabel">Loket 1</span>
+    </div>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <main class="display-main">
+    <div class="current-call" id="currentCall">
+      <div class="current-label" id="currentLabel">Menunggu Panggilan</div>
+      <div class="current-value" id="currentValue">&mdash;</div>
+      <div class="current-dir">Silakan menuju <span id="dirCounter">Loket 1</span></div>
+    </div>
+  </main>
+
+  <section class="recent-section">
+    <h2 class="recent-title">Panggilan Terakhir</h2>
+    <ul class="recent-list" id="recentList"></ul>
+  </section>
+
+  <footer class="display-footer">
+    <button class="btn ghost" id="muteBtn">Nonaktifkan Suara</button>
+    <button class="btn ghost" id="replayBtn">Ulangi Panggilan Terakhir</button>
+    <span class="conn-status" id="connStatus">Menghubungkan...</span>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/tts.js"></script>
+  <script src="/js/display.js"></script>
+</body>
+</html>
