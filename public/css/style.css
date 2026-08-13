@@ -406,6 +406,37 @@ body {
   max-width: 90vw;
 }
 
+.audio-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 15, 30, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  cursor: pointer;
+}
+
+.audio-overlay-box {
+  text-align: center;
+  padding: 3rem 4rem;
+  border: 3px solid var(--display-accent);
+  border-radius: 24px;
+  max-width: 80vw;
+}
+
+.audio-overlay-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--display-text);
+  margin-bottom: 0.8rem;
+}
+
+.audio-overlay-sub {
+  font-size: 1.3rem;
+  color: #cbd5e1;
+}
+
 .toast.error {
   background: var(--danger);
 }

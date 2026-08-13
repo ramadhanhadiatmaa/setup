@@ -64,9 +64,21 @@ Setelah deploy, uji dari 2 perangkat berbeda. Test TTS di browser/perangkat TV y
 5. **Panggil Nomor Manual** — ketik `15` atau `A15` untuk memanggil nomor tertentu (prioritas/lansia).
 6. **Panggil Berdasarkan Nama** — ketik nama pasien (mis. panggilan hasil lab) → display menampilkan nama + suara "Bapak/Ibu [nama], silakan menuju Loket 1."
 
-Halaman Display (buka di TV): panggilan terbaru tampil besar di tengah, riwayat 5 panggilan terakhir, jam, tombol **Nonaktifkan Suara** dan **Ulangi Panggilan Terakhir**.
+Halaman Display (buka di TV): panggilan terbaru tampil besar di tengah, riwayat 5 panggilan terakhir, jam, tombol **Nonaktifkan Suara** dan **Ulangi Panggilan Terakhir**. Saat pertama dibuka, layar menampilkan overlay **"Ketuk layar untuk mengaktifkan suara"** — tap sekali (persyaratan autoplay browser), setelah itu panggilan bersuara otomatis. Status suara tampil di pojok footer (mis. "Suara siap (Bahasa Indonesia)" atau peringatan jika voice tidak ditemukan).
 
-## 5. Struktur Project
+## 5. Troubleshooting Suara (TTS)
+
+Jika nomor bertambah di display tapi **suara tidak keluar**:
+
+1. **Tap/klik layar display sekali** setelah halaman dibuka (overlay kuning "Ketuk layar untuk mengaktifkan suara") — browser mewajibkan interaksi pertama sebelum speech diperbolehkan.
+2. **Volume media** perangkat > 0 — bukan volume dering; di iPhone pastikan **silent switch mati** (silent switch mematikan speech synthesis).
+3. **Engine TTS Bahasa Indonesia ada?** — cek di footer display (label "Suara siap" / peringatan):
+   - **Android**: Settings → Accessibility → Text-to-speech output → pastikan Google TTS aktif dan voice Bahasa Indonesia terpasang (download jika perlu).
+   - **Windows (Chrome)**: Settings → Time & Language → Speech → tambahkan voice "Indonesian" (Microsoft Andika); Chrome juga punya voice jaringan "Google Bahasa Indonesia" (butuh internet).
+   - **iOS**: voice Indonesian (Damayanti) tersedia bawaan.
+4. Kalau voice id-ID tetap tidak ada, sistem berbicara dengan suara default (aksen mungkin kurang pas) — teks besar di layar tetap tampil sebagai fallback.
+
+## 6. Struktur Project
 
 ```
 public/
@@ -82,7 +94,7 @@ firebase/
 vercel.json         rewrite /admin -> /admin.html
 ```
 
-## 6. Skema Data (Firestore)
+## 7. Skema Data (Firestore)
 
 Koleksi `queues` (satu dokumen per nomor):
 
@@ -103,7 +115,7 @@ Koleksi `call_events` (satu dokumen per pengumuman — display hanya subscribe i
 | calledBy | string | uid petugas |
 | calledAt | timestamp | |
 
-## 7. Catatan Teknis & Batasan
+## 8. Catatan Teknis & Batasan
 
 - Tulis antrian memakai pola **baca dulu, lalu `WriteBatch`** (commit atomik: semua dokumen tulis atau tidak sama sekali). Catatan: layer compat SDK tidak mendukung query di dalam `runTransaction`; karenanya nomor max dibaca di luar batch. Untuk skala 1 loket/1 petugas aman — jika dua klik terjadi bersamaan di tab berbeda, kemungkinan nomor ganda sangat kecil (dapat dihindari di v2 dengan Cloud Function).
 - Keamanan: Security Rules — publik hanya bisa baca `queues`/`call_events`; tulis wajib login + `calledBy` harus uid yang sedang login; `call_events` tidak bisa di-update/dihapus oleh client.

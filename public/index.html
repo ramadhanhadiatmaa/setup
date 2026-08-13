@@ -8,6 +8,12 @@
 </head>
 <body class="display-body">
   <div id="fatalError" class="fatal-error hidden"></div>
+  <div id="audioOverlay" class="audio-overlay hidden">
+    <div class="audio-overlay-box">
+      <p class="audio-overlay-title">Ketuk layar untuk mengaktifkan suara</p>
+      <p class="audio-overlay-sub">Setelah ini, panggilan antrian akan disuarakan otomatis</p>
+    </div>
+  </div>
   <header class="display-header">
     <div class="brand">
       <span class="brand-title">RSU Santa Elisabeth</span>
@@ -33,6 +39,7 @@
     <button class="btn ghost" id="muteBtn">Nonaktifkan Suara</button>
     <button class="btn ghost" id="replayBtn">Ulangi Panggilan Terakhir</button>
     <span class="conn-status" id="connStatus">Menghubungkan...</span>
+    <span class="conn-status" id="ttsStatus"></span>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>

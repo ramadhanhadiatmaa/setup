@@ -34,17 +34,52 @@ function queueNumberToWords(value, prefix) {
 }
 
 let preferredVoice = null;
+const ttsListeners = [];
 
 function pickIndonesianVoice() {
   if (typeof speechSynthesis === 'undefined') return;
   const voices = speechSynthesis.getVoices();
   preferredVoice =
     voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('id')) || null;
+  notifyTtsListeners();
 }
 
 if (typeof speechSynthesis !== 'undefined') {
   pickIndonesianVoice();
   speechSynthesis.onvoiceschanged = pickIndonesianVoice;
+}
+
+function ttsState() {
+  if (typeof speechSynthesis === 'undefined') {
+    return { supported: false, voices: 0, hasVoice: false, hasIdVoice: false };
+  }
+  const voices = speechSynthesis.getVoices();
+  return {
+    supported: true,
+    voices: voices.length,
+    hasVoice: voices.length > 0,
+    hasIdVoice: voices.some((v) => v.lang && v.lang.toLowerCase().startsWith('id')),
+  };
+}
+
+function notifyTtsListeners() {
+  const state = ttsState();
+  ttsListeners.forEach((fn) => fn(state));
+}
+
+function onTtsStateChange(fn) {
+  ttsListeners.push(fn);
+  fn(ttsState());
+}
+
+function unlockAudio() {
+  if (typeof speechSynthesis === 'undefined') return;
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(' ');
+  utter.volume = 0;
+  utter.onstart = () => speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+  notifyTtsListeners();
 }
 
 function speakText(text) {
@@ -54,6 +89,7 @@ function speakText(text) {
   utter.lang = 'id-ID';
   utter.rate = 0.95;
   if (preferredVoice) utter.voice = preferredVoice;
+  utter.onerror = () => notifyTtsListeners();
   speechSynthesis.speak(utter);
 }
 

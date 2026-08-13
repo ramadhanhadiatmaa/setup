@@ -21,6 +21,32 @@ function setConnStatus(text) {
   $('connStatus').textContent = text;
 }
 
+let audioUnlocked = false;
+
+function renderTtsStatus(state) {
+  const el = $('ttsStatus');
+  if (!el) return;
+  if (!state.supported) {
+    el.textContent = 'Suara tidak didukung di browser ini (teks tetap tampil)';
+  } else if (!audioUnlocked) {
+    el.textContent = 'Ketuk layar untuk mengaktifkan suara';
+  } else if (!state.hasVoice) {
+    el.textContent = 'Tidak ada voice TTS ditemukan - periksa pengaturan TTS perangkat';
+  } else if (!state.hasIdVoice) {
+    el.textContent = 'Voice Bahasa Indonesia tidak ditemukan - suara default dipakai';
+  } else {
+    el.textContent = 'Suara siap (Bahasa Indonesia)';
+  }
+}
+
+function unlockAudioAndHide() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  const overlay = $('audioOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  unlockAudio();
+}
+
 function renderCurrent(event) {
   const isNumber = event.type === 'number';
   $('currentLabel').textContent = isNumber ? 'Sedang Dipanggil' : 'Panggilan Pasien';
@@ -84,11 +110,18 @@ async function init() {
   setInterval(updateClock, 1000);
   $('dirCounter').textContent = COUNTER_LABEL;
 
-  if (!speechSupported()) {
-    setConnStatus('Suara tidak didukung di browser ini (teks tetap tampil)');
+  onTtsStateChange(renderTtsStatus);
+
+  if (speechSupported()) {
+    const overlay = $('audioOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+    ['click', 'touchstart', 'keydown'].forEach((evt) =>
+      document.addEventListener(evt, unlockAudioAndHide)
+    );
   }
 
-  const { db } = initFirebase();  db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+  const { db } = initFirebase();
+  db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
     if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
       console.warn('Persistence display:', err);
     }
@@ -119,6 +152,7 @@ async function init() {
     muted = !muted;
     window.__queueMuted = muted;
     if (muted && typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+    else unlockAudio();
     $('muteBtn').textContent = muted ? 'Aktifkan Suara' : 'Nonaktifkan Suara';
   });
 
