@@ -1,5 +1,4 @@
 let lastCallId = null;
-let repeatTimer = null;
 let audioUnlocked = false;
 const calledNames = new Set();
 let lastQueueData = null;
@@ -99,14 +98,17 @@ function handleQueueSnapshot(snapshot) {
   renderAllColumns();
 }
 
+function poliLabel(ruangan) {
+  const cleaned = String(ruangan || '').trim();
+  if (!cleaned) return 'poli';
+  return 'poli ' + cleaned.replace(/^poli\s+/i, '');
+}
+
 function speakAnnouncement(name, ruangan) {
-  clearTimeout(repeatTimer);
-  const text = buildAnnouncement(
-    { type: 'name', value: name, title: null },
-    { counterLabel: ruangan || 'loket pelayanan', queuePrefix: 'A' }
-  );
-  speakText(text);
-  repeatTimer = setTimeout(() => speakText(text), 5000);
+  const spokenName = normalizeNameForTts(name);
+  const spokenRuangan = normalizeRuanganForTts(poliLabel(ruangan));
+  const text = 'Kepada pasien atas nama ' + spokenName + ', silakan menuju ke ' + spokenRuangan + '.';
+  speakRepeated(text, 2, 2500);
 }
 
 function handleCallSnapshot(snapshot) {

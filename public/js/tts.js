@@ -93,8 +93,49 @@ function speakText(text) {
   speechSynthesis.speak(utter);
 }
 
+let repeatVersion = 0;
+let repeatTimer = null;
+
+function speakRepeated(text, times, pauseMs) {
+  if (typeof speechSynthesis === 'undefined') return;
+  repeatVersion++;
+  clearTimeout(repeatTimer);
+  const version = repeatVersion;
+
+  const speakOnce = () => {
+    if (version !== repeatVersion) return;
+    if (window.__queueMuted) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'id-ID';
+    utter.rate = 0.95;
+    if (preferredVoice) utter.voice = preferredVoice;
+    utter.onend = () => {
+      if (version !== repeatVersion) return;
+      if (times > 1) {
+        times--;
+        repeatTimer = setTimeout(speakOnce, pauseMs);
+      }
+    };
+    utter.onerror = () => notifyTtsListeners();
+    speechSynthesis.speak(utter);
+  };
+
+  speakOnce();
+}
+
 function speechSupported() {
   return typeof speechSynthesis !== 'undefined';
+}
+
+function normalizeNameForTts(text) {
+  return String(text || '').replace(/\b\w+\b/g, (w) =>
+    w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+  );
+}
+
+function normalizeRuanganForTts(text) {
+  return String(text || '').replace(/\bdr\.?(?!\w)/gi, 'dokter');
 }
 
 function buildAnnouncement(event, cfg) {
@@ -105,5 +146,6 @@ function buildAnnouncement(event, cfg) {
   }
   const title = event.title || null;
   const prefix = title ? title : 'Kepada';
-  return prefix + ' ' + event.value + ', silakan menuju ' + counter + '.';
+  const name = normalizeNameForTts(event.value);
+  return prefix + ' ' + name + ', silakan menuju ' + counter + '.';
 }
