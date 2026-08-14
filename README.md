@@ -62,7 +62,7 @@ Setelah deploy, uji dari 2 perangkat berbeda. Test TTS di browser/perangkat TV y
 3. **Panggil Ulang** — mengumumkan ulang nomor terakhir (pasien belum datang).
 4. **Skip Nomor** — melewati nomor berikutnya (tidak diumumkan).
 5. **Panggil Nomor Manual** — ketik `15` atau `A15` untuk memanggil nomor tertentu (prioritas/lansia).
-6. **Panggil Berdasarkan Nama** — ketik nama pasien (mis. panggilan hasil lab) → display menampilkan nama + suara "Bapak/Ibu [nama], silakan menuju Loket 1."
+6. **Panggil Berdasarkan Nama** — ketik nama pasien (mis. panggilan hasil lab) → display menampilkan nama + suara "Kepada [nama], silakan menuju Pendaftaran."
 
 Halaman Display (buka di TV): panggilan terbaru tampil besar di tengah, riwayat 5 panggilan terakhir, jam, tombol **Nonaktifkan Suara** dan **Ulangi Panggilan Terakhir**. Saat pertama dibuka, layar menampilkan overlay **"Ketuk layar untuk mengaktifkan suara"** — tap sekali (persyaratan autoplay browser), setelah itu panggilan bersuara otomatis. Status suara tampil di pojok footer (mis. "Suara siap (Bahasa Indonesia)" atau peringatan jika voice tidak ditemukan).
 

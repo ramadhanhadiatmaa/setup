@@ -9,7 +9,7 @@ const firebaseConfig = {
   measurementId: "G-9V837DQ198"
 };
 
-const COUNTER_LABEL = 'Loket 1';
+const COUNTER_LABEL = 'Pendaftaran';
 const QUEUE_PREFIX = 'A';
 
 function initFirebase() {
