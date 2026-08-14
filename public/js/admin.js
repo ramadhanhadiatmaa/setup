@@ -215,17 +215,18 @@ async function callManual(rawNumber) {
   return num;
 }
 
-async function callName(name) {
+async function callName(name, title) {
   const cleaned = String(name).trim();
   if (!cleaned) throw new Error('Masukkan nama pasien terlebih dahulu');
   if (cleaned.length > 100) throw new Error('Nama terlalu panjang (maks 100 karakter)');
   await db.collection('call_events').add({
     type: 'name',
     value: cleaned,
+    title: title || null,
     calledBy: user.uid,
     calledAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
-  return cleaned;
+  return { name: cleaned, title: title || null };
 }
 
 function bindActions() {
@@ -285,8 +286,9 @@ function bindActions() {
 
   $('nameBtn').addEventListener('click', async () => {
     try {
-      const name = await callName($('nameInput').value);
-      showToast('Nama "' + name + '" dipanggil');
+      const result = await callName($('nameInput').value, $('nameTitle').value);
+      const label = result.title ? result.title + ' ' + result.name : 'Kepada ' + result.name;
+      showToast(label + ' dipanggil');
       $('nameInput').value = '';
     } catch (err) {
       showToast(err.message, true);

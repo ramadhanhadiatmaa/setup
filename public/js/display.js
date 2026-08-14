@@ -79,6 +79,7 @@ function eventFromDoc(doc) {
     id: doc.id,
     type: d.type,
     value: d.value,
+    title: d.title || null,
     calledAt: d.calledAt,
   };
 }

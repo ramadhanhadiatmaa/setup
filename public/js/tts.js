@@ -103,5 +103,7 @@ function buildAnnouncement(event, cfg) {
     const words = queueNumberToWords(event.value, cfg.queuePrefix || 'A');
     return 'Nomor antrian ' + words + ', silakan menuju ' + counter + '.';
   }
-  return 'Kepada ' + event.value + ', silakan menuju ' + counter + '.';
+  const title = event.title || null;
+  const prefix = title ? title : 'Kepada';
+  return prefix + ' ' + event.value + ', silakan menuju ' + counter + '.';
 }

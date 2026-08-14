@@ -270,12 +270,19 @@ body {
 }
 
 .field input,
-.inline-form input {
+.inline-form input,
+.title-select {
   width: 100%;
   padding: 0.75rem 0.9rem;
   font-size: 1rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
+}
+
+.title-select {
+  width: auto;
+  min-width: 12rem;
+  background: #fff;
 }
 
 .field input:focus,
