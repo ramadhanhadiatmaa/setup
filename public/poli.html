@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antrian Pasien Poli - RSU Santa Elisabeth</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="display-body">
+  <div id="fatalError" class="fatal-error hidden"></div>
+  <div id="audioOverlay" class="audio-overlay hidden">
+    <div class="audio-overlay-box">
+      <p class="audio-overlay-title">Ketuk layar untuk mengaktifkan suara</p>
+      <p class="audio-overlay-sub">Setelah ini, panggilan pasien akan disuarakan otomatis</p>
+    </div>
+  </div>
+  <header class="display-header">
+    <div class="brand">
+      <span class="brand-title">RSU Santa Elisabeth</span>
+      <span class="brand-sub">Antrian Pasien Poli</span>
+    </div>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <main class="poli-main">
+    <section class="poli-column" data-poli="penyakit-dalam">
+      <h2 class="poli-title">Penyakit Dalam</h2>
+      <div class="poli-now">
+        <span class="poli-now-label">Sedang Dilayani</span>
+        <span class="poli-now-name" id="now-penyakit-dalam">Menunggu panggilan</span>
+      </div>
+      <div class="poli-next">
+        <span class="poli-next-label">Berikutnya</span>
+        <span class="poli-next-name" id="next-penyakit-dalam">-</span>
+      </div>
+    </section>
+    <section class="poli-column" data-poli="poli-anak">
+      <h2 class="poli-title">Poli Anak</h2>
+      <div class="poli-now">
+        <span class="poli-now-label">Sedang Dilayani</span>
+        <span class="poli-now-name" id="now-poli-anak">Menunggu panggilan</span>
+      </div>
+      <div class="poli-next">
+        <span class="poli-next-label">Berikutnya</span>
+        <span class="poli-next-name" id="next-poli-anak">-</span>
+      </div>
+    </section>
+    <section class="poli-column" data-poli="poli-umum">
+      <h2 class="poli-title">Poli Umum</h2>
+      <div class="poli-now">
+        <span class="poli-now-label">Sedang Dilayani</span>
+        <span class="poli-now-name" id="now-poli-umum">Menunggu panggilan</span>
+      </div>
+      <div class="poli-next">
+        <span class="poli-next-label">Berikutnya</span>
+        <span class="poli-next-name" id="next-poli-umum">-</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="display-footer">
+    <a class="btn ghost" href="/">Kembali ke Display Utama</a>
+    <span class="conn-status" id="connStatus">Menghubungkan...</span>
+    <span class="conn-status" id="ttsStatus"></span>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/tts.js"></script>
+  <script src="/js/poli.js"></script>
+</body>
+</html>

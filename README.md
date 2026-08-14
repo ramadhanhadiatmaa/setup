@@ -4,6 +4,7 @@ Sistem antrian digital untuk 1 loket dengan dua halaman statis:
 
 - **`/` (Display)** — ditampilkan di TV ruang tunggu. Menampilkan nomor/nama yang dipanggil (font besar), riwayat 5 panggilan terakhir, dan suara panggilan otomatis (Web Speech API, bahasa Indonesia).
 - **`/admin` (Petugas)** — login email/password, tombol Panggil Berikutnya, Panggil Ulang, Skip, panggil nomor manual, dan panggil berdasarkan nama pasien.
+- **`/poli` (Display Poli)** — daftar antrian pasien poli 3 kolom (Penyakit Dalam, Poli Anak, Poli Umum) dari collection `antrian_hari_ini`, realtime, read-only.
 
 ## Arsitektur
 
@@ -66,6 +67,10 @@ Setelah deploy, uji dari 2 perangkat berbeda. Test TTS di browser/perangkat TV y
 
 Halaman Display (buka di TV): panggilan terbaru tampil besar di tengah, riwayat 5 panggilan terakhir, jam, tombol **Nonaktifkan Suara** dan **Ulangi Panggilan Terakhir**. Saat pertama dibuka, layar menampilkan overlay **"Ketuk layar untuk mengaktifkan suara"** — tap sekali (persyaratan autoplay browser), setelah itu panggilan bersuara otomatis. Status suara tampil di pojok footer (mis. "Suara siap (Bahasa Indonesia)" atau peringatan jika voice tidak ditemukan).
 
+Halaman Display Poli (buka di TV ruang tunggu poli): 3 kolom (**Penyakit Dalam** — termasuk dr. Andri & dr. Irwandi —, **Poli Anak**, **Poli Umum**). Tiap kolom menampilkan pasien yang **sedang dilayani** (nama besar di kotak kuning, dari `poli_calls` terbaru poli tersebut) dan di bawahnya **1 nama pasien berikutnya** (pasien pertama urut `NOMOR` di `antrian_hari_ini` yang belum dipanggil). Data antrian dari collection `antrian_hari_ini` (field UPPERCASE: `NAMA`, `NOMOR`, `RUANGAN`, `TANGGAL`) untuk hari ini; ruangan di luar 3 kategori diabaikan. Collection ini diisi sistem lain (hanya baca).
+
+**Pemanggilan pasien poli + suara**: halaman `/admin` memiliki **menu bar** `[Pendaftaran | Poli]` — tab terakhir yang dipilih diingat otomatis. Di menu **Poli**, petugas melihat 3 kolom (Penyakit Dalam, Poli Anak, Poli Umum) berisi daftar nama pasien hari ini dengan tombol **Panggil** di samping tiap nama. Tombol berubah menjadi **Sudah Dipanggil** (abu-abu) setelah dipanggil; bisa diklik lagi untuk panggil ulang. Sistem menulis ke collection `poli_calls` (`name`, `ruangan`, `calledBy`, `calledAt`). Display Poli menerima event tersebut dan mengumumkan 2x: *"Kepada [NAMA], silakan menuju [RUANGAN]."* plus nama pasien disorot kuning di kolomnya. Display Poli juga memerlukan **tap layar sekali** saat pertama dibuka (overlay suara, sama seperti display utama).
+
 ## 5. Troubleshooting Suara (TTS)
 
 Jika nomor bertambah di display tapi **suara tidak keluar**:
@@ -82,12 +87,14 @@ Jika nomor bertambah di display tapi **suara tidak keluar**:
 
 ```
 public/
-  index.html        halaman Display
+  index.html        halaman Display (pemanggil antrian)
+  poli.html         halaman Display Antrian Poli (3 kolom)
   admin.html        halaman Petugas
   css/style.css     styling (tema display kontras tinggi + admin)
   js/config.js      firebaseConfig + COUNTER_LABEL + QUEUE_PREFIX
   js/tts.js         TTS id-ID + konversi angka ke kata (A02 -> "A dua")
   js/display.js     subscribe call_events, tampil + bicara
+  js/poli.js        subscribe antrian_hari_ini, kelompokkan 3 kolom poli
   js/admin.js       login + aksi antrian (get + batch tulis)
 firebase/
   firestore.rules   tempel ke console Firebase (Firestore -> Rules)

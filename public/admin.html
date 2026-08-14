@@ -30,7 +30,7 @@
     <header class="admin-header">
       <div>
         <h1>Halaman Petugas</h1>
-        <p class="admin-header-sub" id="counterLabel">Pendaftaran</p>
+        <p class="admin-header-sub" id="counterLabel">RSU Santa Elisabeth</p>
       </div>
       <div class="admin-user">
         <span id="userEmail"></span>
@@ -38,52 +38,77 @@
       </div>
     </header>
 
-    <section class="status-cards">
-      <div class="status-card">
-        <span class="status-label">Nomor Terakhir Dipanggil</span>
-        <span class="status-value" id="statLast">-</span>
-      </div>
-      <div class="status-card">
-        <span class="status-label">Nomor Berikutnya</span>
-        <span class="status-value" id="statNext">-</span>
-      </div>
-      <div class="status-card">
-        <span class="status-label">Total Panggilan Hari Ini</span>
-        <span class="status-value" id="statTotal">-</span>
-      </div>
-    </section>
+    <nav class="admin-menu">
+      <button class="admin-menu-item active" id="menuPendaftaran">Pendaftaran</button>
+      <button class="admin-menu-item" id="menuPoli">Poli</button>
+    </nav>
 
-    <section class="action-grid">
-      <button class="btn primary big" id="callNextBtn">Panggil Berikutnya</button>
-      <button class="btn" id="recallBtn">Panggil Ulang</button>
-      <button class="btn warn" id="skipBtn">Skip Nomor</button>
-    </section>
+    <div id="viewPendaftaran">
+      <section class="status-cards">
+        <div class="status-card">
+          <span class="status-label">Nomor Terakhir Dipanggil</span>
+          <span class="status-value" id="statLast">-</span>
+        </div>
+        <div class="status-card">
+          <span class="status-label">Nomor Berikutnya</span>
+          <span class="status-value" id="statNext">-</span>
+        </div>
+        <div class="status-card">
+          <span class="status-label">Total Panggilan Hari Ini</span>
+          <span class="status-value" id="statTotal">-</span>
+        </div>
+      </section>
 
-    <section class="panel">
-      <h2>Panggil Nomor Manual</h2>
-      <div class="inline-form">
-        <input type="text" id="manualNumber" placeholder="contoh: 15 atau A15" inputmode="numeric">
-        <button class="btn" id="manualBtn">Panggil</button>
+      <section class="action-grid">
+        <button class="btn primary big" id="callNextBtn">Panggil Berikutnya</button>
+        <button class="btn" id="recallBtn">Panggil Ulang</button>
+        <button class="btn warn" id="skipBtn">Skip Nomor</button>
+      </section>
+
+      <section class="panel">
+        <h2>Panggil Nomor Manual</h2>
+        <div class="inline-form">
+          <input type="text" id="manualNumber" placeholder="contoh: 15 atau A15" inputmode="numeric">
+          <button class="btn" id="manualBtn">Panggil</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Panggil Berdasarkan Nama</h2>
+        <div class="inline-form">
+          <select id="nameTitle" class="title-select">
+            <option value="">- Langsung kepada -</option>
+            <option value="Bapak">Bapak</option>
+            <option value="Ibu">Ibu</option>
+          </select>
+          <input type="text" id="nameInput" placeholder="ketik nama pasien" maxlength="100">
+          <button class="btn" id="nameBtn">Panggil</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Riwayat Panggilan Hari Ini</h2>
+        <ul class="log-list" id="logList"></ul>
+      </section>
+    </div>
+
+    <div id="viewPoli" class="hidden">
+      <div class="poli-admin-grid">
+        <section class="panel poli-admin-column">
+          <h2>Penyakit Dalam</h2>
+          <ul class="poli-admin-list" id="poliListPenyakitDalam"></ul>
+        </section>
+        <section class="panel poli-admin-column">
+          <h2>Poli Anak</h2>
+          <ul class="poli-admin-list" id="poliListPoliAnak"></ul>
+        </section>
+        <section class="panel poli-admin-column">
+          <h2>Poli Umum</h2>
+          <ul class="poli-admin-list" id="poliListPoliUmum"></ul>
+        </section>
       </div>
-    </section>
-
-    <section class="panel">
-      <h2>Panggil Berdasarkan Nama</h2>
-      <div class="inline-form">
-        <select id="nameTitle" class="title-select">
-          <option value="">- Langsung kepada -</option>
-          <option value="Bapak">Bapak</option>
-          <option value="Ibu">Ibu</option>
-        </select>
-        <input type="text" id="nameInput" placeholder="ketik nama pasien" maxlength="100">
-        <button class="btn" id="nameBtn">Panggil</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Riwayat Panggilan Hari Ini</h2>
-      <ul class="log-list" id="logList"></ul>
-    </section>
+      <p class="panel-note">Tekan tombol Panggil di samping nama pasien untuk memanggil ke layar Display Poli.</p>
+    </div>
   </div>
 
   <div class="toast hidden" id="toast"></div>

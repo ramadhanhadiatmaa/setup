@@ -207,6 +207,106 @@ body {
   font-size: 0.95rem;
 }
 
+/* ---------- Halaman Display Poli ---------- */
+
+.poli-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 2rem 2.5rem;
+  align-items: stretch;
+}
+
+.poli-column {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.poli-title {
+  font-size: 2rem;
+  color: var(--display-accent);
+  border-bottom: 3px solid var(--display-accent);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.poli-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.poli-now {
+  background: var(--display-accent);
+  border-radius: 14px;
+  padding: 1.4rem 1rem;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.poli-now-label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #1e293b;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.poli-now-name {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #1e293b;
+  word-break: break-word;
+  line-height: 1.15;
+}
+
+.poli-next {
+  text-align: center;
+}
+
+.poli-next-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.poli-next-name {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--display-text);
+  word-break: break-word;
+}
+
+.poli-empty {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.poli-called {
+  background: var(--display-accent);
+  color: #1e293b;
+  box-shadow: 0 0 20px rgba(255, 216, 77, 0.5);
+}
+
+.panel-note {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
 /* ---------- Halaman Admin ---------- */
 
 .admin-body {
@@ -307,6 +407,79 @@ body {
   align-items: center;
   gap: 1rem;
   color: #475569;
+}
+
+.admin-menu {
+  display: flex;
+  gap: 0.5rem;
+  background: #e2e8f0;
+  padding: 0.4rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  width: fit-content;
+}
+
+.admin-menu-item {
+  border: none;
+  background: transparent;
+  padding: 0.7rem 1.8rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 9px;
+  cursor: pointer;
+  color: #475569;
+}
+
+.admin-menu-item.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.poli-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.poli-admin-column h2 {
+  text-align: center;
+}
+
+.poli-admin-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.poli-admin-list .poli-empty {
+  text-align: center;
+  color: #64748b;
+}
+
+.poli-admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.poli-admin-name {
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+
+.poli-admin-btn {
+  white-space: nowrap;
+  background: #059669;
+}
+
+.poli-admin-btn.called {
+  background: #94a3b8;
 }
 
 .status-cards {
@@ -450,6 +623,14 @@ body {
 
 @media (max-width: 800px) {
   .action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .poli-main {
+    grid-template-columns: 1fr;
+  }
+
+  .poli-admin-grid {
     grid-template-columns: 1fr;
   }
 

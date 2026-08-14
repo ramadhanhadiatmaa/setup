@@ -17,6 +17,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Location", "/admin.html")
             self.end_headers()
             return
+        if self.path in ("/poli", "/poli/"):
+            self.send_response(301)
+            self.send_header("Location", "/poli.html")
+            self.end_headers()
+            return
         super().do_GET()
 
 

@@ -229,6 +229,107 @@ async function callName(name, title) {
   return { name: cleaned, title: title || null };
 }
 
+const POLI_COLUMNS = {
+  'penyakit-dalam': { id: 'poliListPenyakitDalam' },
+  'poli-anak': { id: 'poliListPoliAnak' },
+  'poli-umum': { id: 'poliListPoliUmum' },
+};
+const poliCalledNames = new Set();
+let poliQueueData = null;
+
+function poliColumnKey(ruangan) {
+  const r = String(ruangan || '').toLowerCase();
+  if (r.includes('penyakit dalam')) return 'penyakit-dalam';
+  if (r.includes('anak')) return 'poli-anak';
+  if (r.includes('umum')) return 'poli-umum';
+  return null;
+}
+
+function renderPoliAdmin() {
+  if (!poliQueueData) return;
+  Object.keys(POLI_COLUMNS).forEach((key) => {
+    const list = $(POLI_COLUMNS[key].id);
+    list.innerHTML = '';
+    const patients = poliQueueData[key] || [];
+    if (patients.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'poli-empty';
+      li.textContent = 'Belum ada antrian';
+      list.appendChild(li);
+      return;
+    }
+    patients.forEach((p) => {
+      const li = document.createElement('li');
+      li.className = 'poli-admin-row';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'poli-admin-name';
+      nameSpan.textContent = p.name;
+      const btn = document.createElement('button');
+      btn.className = 'btn poli-admin-btn';
+      const called = poliCalledNames.has(p.name);
+      btn.classList.toggle('called', called);
+      btn.textContent = called ? 'Sudah Dipanggil' : 'Panggil';
+      btn.addEventListener('click', () => callPoliPatient(p.name, p.ruangan, btn));
+      li.append(nameSpan, btn);
+      list.appendChild(li);
+    });
+  });
+}
+
+function loadPoliAdmin() {
+  db.collection('antrian_hari_ini')
+    .where('TANGGAL', '==', localDateStr())
+    .onSnapshot((snap) => {
+      const grouped = { 'penyakit-dalam': [], 'poli-anak': [], 'poli-umum': [] };
+      snap.docs.forEach((doc) => {
+        const d = doc.data();
+        const key = poliColumnKey(d.RUANGAN);
+        if (!key) return;
+        grouped[key].push({
+          name: String(d.NAMA || '').trim(),
+          ruangan: String(d.RUANGAN || '').trim(),
+          nomor: typeof d.NOMOR === 'number' ? d.NOMOR : 0,
+        });
+      });
+      Object.keys(grouped).forEach((key) =>
+        grouped[key].sort((a, b) => a.nomor - b.nomor)
+      );
+      poliQueueData = grouped;
+      renderPoliAdmin();
+    }, (err) => {
+      showToast('Gagal memuat daftar pasien poli: ' + err.message, true);
+    });
+
+  db.collection('poli_calls')
+    .where('calledAt', '>=', localMidnight())
+    .onSnapshot((snap) => {
+      poliCalledNames.clear();
+      snap.docs.forEach((doc) => {
+        const name = String(doc.data().name || '').trim();
+        if (name) poliCalledNames.add(name);
+      });
+      renderPoliAdmin();
+    }, () => {});
+}
+
+async function callPoliPatient(name, ruangan, btn) {
+  try {
+    poliCalledNames.add(name);
+    renderPoliAdmin();
+    await db.collection('poli_calls').add({
+      name: name,
+      ruangan: ruangan,
+      calledBy: user.uid,
+      calledAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showToast(name + ' dipanggil ke ' + (ruangan || 'poli'));
+  } catch (err) {
+    poliCalledNames.delete(name);
+    renderPoliAdmin();
+    showToast(err.message, true);
+  }
+}
+
 async function deleteExpiredDocs(query) {
   for (;;) {
     const snap = await query.get();
@@ -319,6 +420,18 @@ function bindActions() {
       showToast(err.message, true);
     }
   });
+
+  $('menuPendaftaran').addEventListener('click', () => setTab('pendaftaran'));
+  $('menuPoli').addEventListener('click', () => setTab('poli'));
+}
+
+function setTab(tab) {
+  localStorage.setItem('adminTab', tab);
+  $('menuPendaftaran').classList.toggle('active', tab === 'pendaftaran');
+  $('menuPoli').classList.toggle('active', tab === 'poli');
+  hidden($('viewPendaftaran'));
+  hidden($('viewPoli'));
+  show(tab === 'pendaftaran' ? $('viewPendaftaran') : $('viewPoli'));
 }
 
 function showFatalError(message) {
@@ -333,13 +446,14 @@ function init() {
   try {
     const { db: firestore, auth } = initFirebase();
     db = firestore;
-    $('counterLabel').textContent = COUNTER_LABEL;
 
     auth.onAuthStateChanged((u) => {
       user = u;
       if (u) {
         $('userEmail').textContent = u.email;
         setView(true);
+        loadPoliAdmin();
+        setTab(localStorage.getItem('adminTab') === 'poli' ? 'poli' : 'pendaftaran');
         if (!cleanupRan) {
           cleanupRan = true;
           cleanupOldData();

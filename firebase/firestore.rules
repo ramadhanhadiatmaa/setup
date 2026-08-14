@@ -35,5 +35,23 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isStaff();
     }
+
+    match /antrian_hari_ini/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /poli_calls/{docId} {
+      allow read: if true;
+      allow create: if isStaff()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.ruangan is string
+        && request.resource.data.ruangan.size() <= 100
+        && request.resource.data.calledBy == request.auth.uid;
+      allow update: if false;
+      allow delete: if isStaff();
+    }
   }
 }

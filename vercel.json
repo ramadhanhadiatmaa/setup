@@ -3,6 +3,7 @@
   "outputDirectory": "public",
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/display", "destination": "/index.html" }
+    { "source": "/display", "destination": "/index.html" },
+    { "source": "/poli", "destination": "/poli.html" }
   ]
 }
