@@ -118,7 +118,8 @@ Koleksi `call_events` (satu dokumen per pengumuman — display hanya subscribe i
 ## 8. Catatan Teknis & Batasan
 
 - Tulis antrian memakai pola **baca dulu, lalu `WriteBatch`** (commit atomik: semua dokumen tulis atau tidak sama sekali). Catatan: layer compat SDK tidak mendukung query di dalam `runTransaction`; karenanya nomor max dibaca di luar batch. Untuk skala 1 loket/1 petugas aman — jika dua klik terjadi bersamaan di tab berbeda, kemungkinan nomor ganda sangat kecil (dapat dihindari di v2 dengan Cloud Function).
-- Keamanan: Security Rules — publik hanya bisa baca `queues`/`call_events`; tulis wajib login + `calledBy` harus uid yang sedang login; `call_events` tidak bisa di-update/dihapus oleh client.
+- Keamanan: Security Rules — publik hanya bisa baca `queues`/`call_events`; tulis wajib login + `calledBy` harus uid yang sedang login; `call_events` tidak bisa di-update oleh client. Hanya petugas (login) yang boleh menghapus.
+- **Pembersihan data otomatis**: setiap kali petugas login ke halaman `/admin`, dokumen dengan tanggal **lewat hari ini** (semua `queues` dengan `queueDate` kemarin/before, dan semua `call_events` sebelum tengah malam hari ini) dihapus otomatis (batch 500 dokumen). Delete Firestore gratis di semua paket — menjaga Firestore tetap kecil dan aman di free tier. Perlu **publish ulang `firebase/firestore.rules`** agar aturan delete staff aktif.
 - Identitas "petugas" = siapa pun yang memiliki akun Auth (akun hanya dibuat via console Firebase oleh admin RS). Untuk v2 bisa ditambah custom claims `role: staff`.
 - Batas free tier Firebase: Firestore 1 GiB storage + 50 ribu baca/20 ribu tulis per hari; Auth gratis tanpa batas praktis. Untuk pemakaian harian RS skala 1 loket sangat aman.
 - Jika internet mati: tidak ada backup lokal — panggil manual via mikrofon sebagai cadangan (SOP RS).

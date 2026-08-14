@@ -229,6 +229,31 @@ async function callName(name, title) {
   return { name: cleaned, title: title || null };
 }
 
+async function deleteExpiredDocs(query) {
+  for (;;) {
+    const snap = await query.get();
+    if (snap.empty) break;
+    const chunk = snap.docs.slice(0, 500);
+    const batch = db.batch();
+    chunk.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    if (snap.docs.length <= 500) break;
+  }
+}
+
+async function cleanupOldData() {
+  try {
+    await deleteExpiredDocs(
+      db.collection('queues').where('queueDate', '<', localDateStr())
+    );
+    await deleteExpiredDocs(
+      db.collection('call_events').where('calledAt', '<', localMidnight())
+    );
+  } catch (err) {
+    console.warn('Pembersihan data lama gagal:', err);
+  }
+}
+
 function bindActions() {
   $('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -302,6 +327,8 @@ function showFatalError(message) {
   show(el);
 }
 
+let cleanupRan = false;
+
 function init() {
   try {
     const { db: firestore, auth } = initFirebase();
@@ -313,7 +340,12 @@ function init() {
       if (u) {
         $('userEmail').textContent = u.email;
         setView(true);
+        if (!cleanupRan) {
+          cleanupRan = true;
+          cleanupOldData();
+        }
       } else {
+        cleanupRan = false;
         setView(false);
       }
     });
