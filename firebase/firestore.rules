@@ -11,7 +11,7 @@ service cloud.firestore {
         && request.resource.data.value is string
         && request.resource.data.value.size() > 0
         && request.resource.data.value.size() <= 100
-        && (request.resource.data.title is string || request.resource.data.title == null)
+        && (!('title' in request.resource.data) || request.resource.data.title is string || request.resource.data.title == null)
         && request.resource.data.calledBy == request.auth.uid;
     }
 
@@ -23,7 +23,7 @@ service cloud.firestore {
         && request.resource.data.queueNumber.size() <= 10
         && request.resource.data.status in ['waiting', 'called', 'done', 'skipped']
         && request.resource.data.queueDate is string
-        && request.resource.data.queueDate.matches('\\d{4}-\\d{2}-\\d{2}');
+        && request.resource.data.queueDate.size() == 10;
       allow update: if isStaff()
         && request.resource.data.status in ['waiting', 'called', 'done', 'skipped'];
       allow delete: if isStaff();

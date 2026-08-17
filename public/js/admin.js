@@ -85,6 +85,15 @@ function renderStatus(queues) {
   $('statNext').textContent = QUEUE_PREFIX + String(max + 1).padStart(2, '0');
 }
 
+let lastListenerError = null;
+
+function onLiveError(source, err) {
+  const msg = source + ': ' + err.message;
+  if (msg === lastListenerError) return;
+  lastListenerError = msg;
+  showToast('Gagal membaca data ' + source + ': ' + err.message, true);
+}
+
 function subscribeLive() {
   const today = localDateStr();
   const queuesQuery = db
@@ -96,16 +105,22 @@ function subscribeLive() {
     .where('calledAt', '>=', localMidnight())
     .orderBy('calledAt', 'desc');
 
-  unsubQueues = queuesQuery.onSnapshot((snap) => {
-    const queues = snap.docs.map((d) => d.data());
-    renderStatus(queues);
-  });
+  unsubQueues = queuesQuery.onSnapshot(
+    (snap) => {
+      const queues = snap.docs.map((d) => d.data());
+      renderStatus(queues);
+    },
+    (err) => onLiveError('antrian (queues)', err)
+  );
 
-  unsubEvents = eventsQuery.onSnapshot((snap) => {
-    const events = snap.docs.map((d) => d.data());
-    $('statTotal').textContent = String(events.length);
-    renderLog(events);
-  });
+  unsubEvents = eventsQuery.onSnapshot(
+    (snap) => {
+      const events = snap.docs.map((d) => d.data());
+      $('statTotal').textContent = String(events.length);
+      renderLog(events);
+    },
+    (err) => onLiveError('riwayat panggilan', err)
+  );
 }
 
 function unsubscribeLive() {
@@ -138,7 +153,12 @@ async function maxQueueNumberToday() {
 
 async function callNext() {
   const today = localDateStr();
-  const max = await maxQueueNumberToday();
+  let max;
+  try {
+    max = await maxQueueNumberToday();
+  } catch (err) {
+    throw new Error('Gagal membaca data antrian: ' + err.message);
+  }
   const num = QUEUE_PREFIX + String(max + 1).padStart(2, '0');
   const batch = db.batch();
   batch.set(db.collection('queues').doc(), {
@@ -151,10 +171,15 @@ async function callNext() {
   batch.set(db.collection('call_events').doc(), {
     type: 'number',
     value: num,
+    title: null,
     calledBy: user.uid,
     calledAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
-  await batch.commit();
+  try {
+    await batch.commit();
+  } catch (err) {
+    throw new Error('Gagal menulis antrian: ' + err.message);
+  }
   return num;
 }
 
@@ -164,6 +189,7 @@ async function recall() {
   await db.collection('call_events').add({
     type: 'number',
     value: cur,
+    title: null,
     calledBy: user.uid,
     calledAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
@@ -171,7 +197,12 @@ async function recall() {
 
 async function skipNext() {
   const today = localDateStr();
-  const max = await maxQueueNumberToday();
+  let max;
+  try {
+    max = await maxQueueNumberToday();
+  } catch (err) {
+    throw new Error('Gagal membaca data antrian: ' + err.message);
+  }
   const num = QUEUE_PREFIX + String(max + 1).padStart(2, '0');
   const batch = db.batch();
   batch.set(db.collection('queues').doc(), {
@@ -180,7 +211,11 @@ async function skipNext() {
     queueDate: today,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
-  await batch.commit();
+  try {
+    await batch.commit();
+  } catch (err) {
+    throw new Error('Gagal menulis antrian: ' + err.message);
+  }
   return num;
 }
 
@@ -188,8 +223,13 @@ async function callManual(rawNumber) {
   const num = normalizeQueueNumber(rawNumber);
   if (!num) throw new Error('Format nomor antrian tidak valid');
   const today = localDateStr();
-  const snap = await db.collection('queues').where('queueDate', '==', today).get();
-  const existing = snap.docs.find((d) => d.data().queueNumber === num);
+  let existing = null;
+  try {
+    const snap = await db.collection('queues').where('queueDate', '==', today).get();
+    existing = snap.docs.find((d) => d.data().queueNumber === num);
+  } catch (err) {
+    throw new Error('Gagal membaca data antrian: ' + err.message);
+  }
   const batch = db.batch();
   if (!existing) {
     batch.set(db.collection('queues').doc(), {
@@ -208,10 +248,15 @@ async function callManual(rawNumber) {
   batch.set(db.collection('call_events').doc(), {
     type: 'number',
     value: num,
+    title: null,
     calledBy: user.uid,
     calledAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
-  await batch.commit();
+  try {
+    await batch.commit();
+  } catch (err) {
+    throw new Error('Gagal menulis antrian: ' + err.message);
+  }
   return num;
 }
 
