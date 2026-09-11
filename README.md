@@ -1,5 +1,7 @@
 # Sistem Display & Pemanggil Antrian — RSU Santa Elisabeth
 
+# 
+
 Sistem antrian digital untuk 1 loket dengan dua halaman statis:
 
 - **`/` (Display)** — ditampilkan di TV ruang tunggu. Menampilkan nomor/nama yang dipanggil (font besar), riwayat 5 panggilan terakhir, dan suara panggilan otomatis (Web Speech API, bahasa Indonesia).
