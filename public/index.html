@@ -6,7 +6,7 @@
   <title>Display Antrian - RSU Santa Elisabeth</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="display-body">
+<body class="display-body is-idle">
   <div id="fatalError" class="fatal-error hidden"></div>
   <div id="audioOverlay" class="audio-overlay hidden">
     <div class="audio-overlay-box">
@@ -22,12 +22,20 @@
     <div class="clock" id="clock"></div>
   </header>
 
-  <main class="display-main">
-    <div class="current-call" id="currentCall">
-      <div class="current-label" id="currentLabel">Menunggu Panggilan</div>
-      <div class="current-value" id="currentValue">&mdash;</div>
-      <div class="current-dir">Silakan menuju <span id="dirCounter">Pendaftaran</span></div>
-    </div>
+  <main class="display-main split">
+    <section class="video-pane" id="videoPane">
+      <div class="video-wrap">
+        <iframe id="liveVideo" title="Siaran informasi" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <p class="video-fallback hidden" id="videoFallback">Video belum diatur — hubungi petugas.</p>
+    </section>
+    <section class="call-pane">
+      <div class="current-call" id="currentCall">
+        <div class="current-label" id="currentLabel">Menunggu Panggilan</div>
+        <div class="current-value" id="currentValue">&mdash;</div>
+        <div class="current-dir">Silakan menuju <span id="dirCounter">Pendaftaran</span></div>
+      </div>
+    </section>
   </main>
 
   <section class="recent-section">

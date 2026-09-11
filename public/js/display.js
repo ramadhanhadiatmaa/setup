@@ -2,8 +2,103 @@ let firebaseApp = null;
 let lastAnnouncement = null;
 let muted = false;
 let lastTopId = null;
+let focusTimer = null;
+let currentVideoId = null;
 
 const $ = (id) => document.getElementById(id);
+
+function focusDurationMs() {
+  return (typeof CALL_FOCUS_MS !== 'undefined' && CALL_FOCUS_MS > 0) ? CALL_FOCUS_MS : 3 * 60 * 1000;
+}
+
+function setMode(mode) {
+  document.body.classList.toggle('is-calling', mode === 'calling');
+  document.body.classList.toggle('is-idle', mode !== 'calling');
+}
+
+function enterIdle() {
+  clearTimeout(focusTimer);
+  focusTimer = null;
+  setMode('idle');
+}
+
+function enterCalling(remainingMs) {
+  clearTimeout(focusTimer);
+  setMode('calling');
+  const ms = remainingMs && remainingMs > 0 ? remainingMs : focusDurationMs();
+  focusTimer = setTimeout(enterIdle, ms);
+}
+
+function getCalledAtMs(calledAt) {
+  try {
+    if (!calledAt) return 0;
+    if (calledAt.toDate) return calledAt.toDate().getTime();
+    const t = new Date(calledAt).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  } catch (err) {
+    return 0;
+  }
+}
+
+function applyVideoId(videoId) {
+  const frame = $('liveVideo');
+  const pane = $('videoPane');
+  const fallback = $('videoFallback');
+  if (!frame || !pane) return;
+  if (!videoId) {
+    currentVideoId = null;
+    frame.removeAttribute('src');
+    pane.classList.add('no-video');
+    if (fallback) fallback.classList.remove('hidden');
+    return;
+  }
+  if (videoId === currentVideoId && frame.getAttribute('src')) return;
+  currentVideoId = videoId;
+  const url = buildYoutubeEmbedUrl(videoId);
+  if (!url) return;
+  // Satu-satunya tempat src ditulis; ganti mode idle/calling hanya tukar class CSS
+  // agar iframe tidak reload.
+  frame.setAttribute('src', url);
+  pane.classList.remove('no-video');
+  if (fallback) fallback.classList.add('hidden');
+}
+
+function applyYoutubeUrl(rawUrl) {
+  const id = (typeof extractYoutubeId === 'function') ? extractYoutubeId(rawUrl) : null;
+  applyVideoId(id);
+}
+
+function subscribeVideoSettings(db) {
+  try {
+    const params = new URLSearchParams(location.search);
+    const override = params.get('live') || params.get('video') || '';
+    const overrideId = override && typeof extractYoutubeId === 'function'
+      ? extractYoutubeId(override)
+      : null;
+    if (overrideId) {
+      applyVideoId(overrideId);
+      return;
+    }
+    if (typeof DEFAULT_YOUTUBE_URL !== 'undefined' && DEFAULT_YOUTUBE_URL) {
+      applyYoutubeUrl(DEFAULT_YOUTUBE_URL);
+    } else {
+      applyVideoId(null);
+    }
+    const col = (typeof DISPLAY_SETTINGS_COLLECTION !== 'undefined') ? DISPLAY_SETTINGS_COLLECTION : 'settings';
+    const docId = (typeof DISPLAY_SETTINGS_DOC !== 'undefined') ? DISPLAY_SETTINGS_DOC : 'display';
+    db.collection(col).doc(docId).onSnapshot((snap) => {
+      if (!snap.exists) {
+        if (!currentVideoId) applyVideoId(null);
+        return;
+      }
+      applyYoutubeUrl(snap.data().youtubeUrl || '');
+    }, (err) => {
+      console.warn('Video settings:', err);
+    });
+  } catch (err) {
+    console.warn('Video settings:', err);
+  }
+}
 
 function formatTime(ts) {
   const d = ts && ts.toDate ? ts.toDate() : new Date(ts);
@@ -90,18 +185,34 @@ function handleSnapshot(snapshot) {
     $('currentLabel').textContent = 'Menunggu Panggilan';
     $('currentValue').textContent = '\u2014';
     renderRecent([]);
+    enterIdle();
+    lastTopId = null;
     return;
   }
   renderCurrent(events[0]);
   renderRecent(events);
 
   const topId = events[0].id;
-  if (lastTopId !== null && topId !== lastTopId) {
+  if (lastTopId === null) {
+    // Load awal / refresh: siapkan teks replay tapi jangan bunyikan ulang otomatis.
+    lastAnnouncement = buildAnnouncement(events[0], {
+      counterLabel: COUNTER_LABEL,
+      queuePrefix: QUEUE_PREFIX,
+    });
+    const age = Date.now() - getCalledAtMs(events[0].calledAt);
+    if (age >= 0 && age < focusDurationMs()) {
+      enterCalling(focusDurationMs() - age);
+    } else {
+      enterIdle();
+    }
+  } else if (topId !== lastTopId) {
+    // Panggilan baru (termasuk recall/nama/manual = dokumen baru) → fokus 3 mnt dari awal.
     lastAnnouncement = buildAnnouncement(events[0], {
       counterLabel: COUNTER_LABEL,
       queuePrefix: QUEUE_PREFIX,
     });
     speakText(lastAnnouncement);
+    enterCalling();
   }
   lastTopId = topId;
 }
@@ -143,6 +254,8 @@ async function init() {
       setConnStatus('Koneksi realtime terputus: ' + err.message);
     }
   );
+
+  subscribeVideoSettings(db);
 
   setConnStatus('Terhubung - pembaruan otomatis aktif');
 

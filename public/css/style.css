@@ -207,6 +207,126 @@ body {
   font-size: 0.95rem;
 }
 
+/* ---------- Display Pendaftaran: split video + antrian ---------- */
+
+.display-main.split {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.video-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.video-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+.video-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.video-fallback {
+  margin-top: 0.8rem;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.video-pane.no-video .video-wrap {
+  display: none;
+}
+
+.call-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Idle: video besar, nomor kecil di bawah/samping */
+body.is-idle .display-main.split {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+body.is-idle .video-pane {
+  flex: 1 1 auto;
+}
+
+body.is-idle .video-wrap {
+  max-height: 62vh;
+  margin: 0 auto;
+  width: min(100%, calc(62vh * 16 / 9));
+}
+
+/* Idle: recent disembunyikan agar rapi */
+body.is-idle .recent-section {
+  display: none;
+}
+
+body.is-idle .call-pane .current-call {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  text-align: left;
+}
+
+body.is-idle .call-pane .current-label {
+  font-size: 1.6rem;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+body.is-idle .call-pane .current-value {
+  font-size: 4.5vw;
+  min-width: 0;
+}
+
+body.is-idle .call-pane .current-dir {
+  font-size: 1.8rem;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+/* Calling (3 mnt): antrian besar, video dock kecil */
+body.is-calling .video-pane {
+  flex: 0 0 22rem;
+  order: 2;
+  justify-content: flex-start;
+}
+
+body.is-calling .call-pane {
+  flex: 1 1 auto;
+}
+
+body.is-calling .current-call {
+  animation: callPulse 1.6s ease-in-out 3;
+}
+
+@keyframes callPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+body.is-calling .video-pane.no-video {
+  display: none;
+}
+
 /* ---------- Halaman Display Poli ---------- */
 
 .poli-main {
@@ -624,6 +744,27 @@ body {
 @media (max-width: 800px) {
   .action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .display-main.split {
+    flex-direction: column;
+  }
+
+  body.is-calling .video-pane {
+    flex: 1 1 auto;
+    order: 2;
+  }
+
+  /* Layar sempit: strip idle kembali vertikal agar tidak sempit */
+  body.is-idle .call-pane .current-call {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  body.is-idle .call-pane .current-label,
+  body.is-idle .call-pane .current-dir {
+    white-space: normal;
   }
 
   .poli-main {

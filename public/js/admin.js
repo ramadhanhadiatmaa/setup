@@ -2,6 +2,7 @@ let db = null;
 let user = null;
 let unsubQueues = null;
 let unsubEvents = null;
+let unsubVideo = null;
 
 const $ = (id) => document.getElementById(id);
 const hidden = (el) => el.classList.add('hidden');
@@ -126,6 +127,52 @@ function subscribeLive() {
 function unsubscribeLive() {
   if (unsubQueues) { unsubQueues(); unsubQueues = null; }
   if (unsubEvents) { unsubEvents(); unsubEvents = null; }
+  if (unsubVideo) { unsubVideo(); unsubVideo = null; }
+}
+
+function renderVideoStatus(rawUrl) {
+  const el = $('videoStatus');
+  if (!el) return;
+  const id = typeof extractYoutubeId === 'function' ? extractYoutubeId(rawUrl) : null;
+  if (!rawUrl) {
+    el.textContent = 'Video nonaktif — display hanya menampilkan antrian.';
+  } else if (id) {
+    el.textContent = 'Sedang tayang (ID: ' + id + ') — berlaku di semua display pendaftaran.';
+  } else {
+    el.textContent = 'Tersimpan tapi format tidak dikenali — periksa URL dan simpan ulang.';
+  }
+}
+
+function subscribeVideoSettings() {
+  const input = $('videoUrlInput');
+  try {
+    const docRef = db.collection(DISPLAY_SETTINGS_COLLECTION).doc(DISPLAY_SETTINGS_DOC);
+    docRef.get().then((snap) => {
+      const raw = snap.exists ? (snap.data().youtubeUrl || '') : '';
+      if (input && document.activeElement !== input) input.value = raw;
+      renderVideoStatus(raw);
+    }).catch((err) => onLiveError('pengaturan video', err));
+    unsubVideo = docRef.onSnapshot((snap) => {
+      const raw = snap.exists ? (snap.data().youtubeUrl || '') : '';
+      if (input && document.activeElement !== input) input.value = raw;
+      renderVideoStatus(raw);
+    }, (err) => onLiveError('pengaturan video', err));
+  } catch (err) {
+    onLiveError('pengaturan video', err);
+  }
+}
+
+async function saveVideoSettings(rawInput) {
+  const raw = String(rawInput || '').trim();
+  if (raw && typeof extractYoutubeId === 'function' && !extractYoutubeId(raw)) {
+    throw new Error('URL/ID YouTube tidak valid. Contoh: https://www.youtube.com/live/VIDEO_ID atau ID 11 karakter.');
+  }
+  if (raw.length > 500) throw new Error('URL terlalu panjang (maks 500 karakter).');
+  await db.collection(DISPLAY_SETTINGS_COLLECTION).doc(DISPLAY_SETTINGS_DOC).set({
+    youtubeUrl: raw,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: user.uid,
+  }, { merge: true });
 }
 
 function setView(loggedIn) {
@@ -134,6 +181,7 @@ function setView(loggedIn) {
   if (loggedIn) {
     show($('appView'));
     subscribeLive();
+    subscribeVideoSettings();
   } else {
     unsubscribeLive();
     show($('loginView'));
@@ -468,6 +516,25 @@ function bindActions() {
 
   $('menuPendaftaran').addEventListener('click', () => setTab('pendaftaran'));
   $('menuPoli').addEventListener('click', () => setTab('poli'));
+
+  $('videoSaveBtn').addEventListener('click', async () => {
+    try {
+      await saveVideoSettings($('videoUrlInput').value);
+      showToast('Video display diperbarui');
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  });
+
+  $('videoDisableBtn').addEventListener('click', async () => {
+    try {
+      await saveVideoSettings('');
+      $('videoUrlInput').value = '';
+      showToast('Video display dinonaktifkan');
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  });
 }
 
 function setTab(tab) {
