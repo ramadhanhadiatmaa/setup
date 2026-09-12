@@ -6,7 +6,7 @@
   <title>Antrian Pasien Poli - RSU Santa Elisabeth</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="display-body">
+<body class="display-body is-idle">
   <div id="fatalError" class="fatal-error hidden"></div>
   <div id="audioOverlay" class="audio-overlay hidden">
     <div class="audio-overlay-box">
@@ -22,44 +22,32 @@
     <div class="clock" id="clock"></div>
   </header>
 
-  <main class="poli-main">
-    <section class="poli-column" data-poli="penyakit-dalam">
-      <h2 class="poli-title">Penyakit Dalam</h2>
-      <div class="poli-now">
-        <span class="poli-now-label">Sedang Dilayani</span>
-        <span class="poli-now-name" id="now-penyakit-dalam">Menunggu panggilan</span>
+  <main class="poli-main split">
+    <aside class="poli-list-pane" id="poliListPane">
+      <h2 class="poli-list-title">Daftar Antrian Poli</h2>
+      <div class="poli-ticker-viewport">
+        <div class="poli-ticker" id="poliTicker"></div>
       </div>
-      <div class="poli-next">
-        <span class="poli-next-label">Berikutnya</span>
-        <span class="poli-next-name" id="next-penyakit-dalam">-</span>
+    </aside>
+    <section class="video-pane" id="videoPane">
+      <div class="video-wrap">
+        <iframe id="liveVideo" title="Siaran informasi" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
+      <p class="video-fallback hidden" id="videoFallback">Video belum diatur — hubungi petugas.</p>
     </section>
-    <section class="poli-column" data-poli="poli-anak">
-      <h2 class="poli-title">Poli Anak</h2>
-      <div class="poli-now">
-        <span class="poli-now-label">Sedang Dilayani</span>
-        <span class="poli-now-name" id="now-poli-anak">Menunggu panggilan</span>
-      </div>
-      <div class="poli-next">
-        <span class="poli-next-label">Berikutnya</span>
-        <span class="poli-next-name" id="next-poli-anak">-</span>
-      </div>
-    </section>
-    <section class="poli-column" data-poli="poli-umum">
-      <h2 class="poli-title">Poli Umum</h2>
-      <div class="poli-now">
-        <span class="poli-now-label">Sedang Dilayani</span>
-        <span class="poli-now-name" id="now-poli-umum">Menunggu panggilan</span>
-      </div>
-      <div class="poli-next">
-        <span class="poli-next-label">Berikutnya</span>
-        <span class="poli-next-name" id="next-poli-umum">-</span>
+    <section class="call-pane">
+      <div class="current-call" id="poliCurrentCall">
+        <div class="current-label" id="poliCallLabel">Menunggu Panggilan</div>
+        <div class="current-value" id="poliCallName">&mdash;</div>
+        <div class="current-dir">Silakan menuju ke <span id="poliCallRoom">poli</span></div>
       </div>
     </section>
   </main>
 
   <footer class="display-footer">
-    <a class="btn ghost" href="/">Kembali ke Display Utama</a>
+    <button class="btn ghost" id="muteBtn">Nonaktifkan Suara</button>
+    <button class="btn ghost" id="replayBtn">Ulangi Panggilan Terakhir</button>
+    <a class="btn ghost" href="/">Display Pendaftaran</a>
     <span class="conn-status" id="connStatus">Menghubungkan...</span>
     <span class="conn-status" id="ttsStatus"></span>
   </footer>

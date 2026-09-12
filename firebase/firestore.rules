@@ -53,5 +53,13 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isStaff();
     }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow create, update: if isStaff()
+        && request.resource.data.youtubeUrl is string
+        && request.resource.data.youtubeUrl.size() <= 500;
+      allow delete: if false;
+    }
   }
 }

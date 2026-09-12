@@ -135,9 +135,9 @@ function renderVideoStatus(rawUrl) {
   if (!el) return;
   const id = typeof extractYoutubeId === 'function' ? extractYoutubeId(rawUrl) : null;
   if (!rawUrl) {
-    el.textContent = 'Video nonaktif — display hanya menampilkan antrian.';
+    el.textContent = 'Video nonaktif — display hanya menampilkan antrian (pendaftaran & poli).';
   } else if (id) {
-    el.textContent = 'Sedang tayang (ID: ' + id + ') — berlaku di semua display pendaftaran.';
+    el.textContent = 'Sedang tayang (ID: ' + id + ') — berlaku di display pendaftaran & poli.';
   } else {
     el.textContent = 'Tersimpan tapi format tidak dikenali — periksa URL dan simpan ulang.';
   }

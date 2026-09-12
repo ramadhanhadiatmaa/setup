@@ -327,6 +327,244 @@ body.is-calling .video-pane.no-video {
   display: none;
 }
 
+/* ---------- Display Poli: 2 bilah (list ticker + video), fokus 2 mnt ---------- */
+
+/* Halaman display poli dikunci pas 1 layar (tidak scroll di desktop) agar
+   video + teks panggilan selalu terlihat; ticker terpotong di dalam kotaknya.
+   Difilter :has(...) supaya display pendaftaran (/) tidak ikut berubah. */
+body:has(.poli-main.split) {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.poli-main.split {
+  flex: 1;
+  display: flex;
+  gap: 2rem;
+  padding: 2rem 2.5rem;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.poli-list-pane {
+  flex: 0 0 24rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.poli-list-title {
+  font-size: 1.5rem;
+  color: var(--display-accent);
+  border-bottom: 3px solid var(--display-accent);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  flex: none;
+}
+
+.poli-ticker-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.poli-ticker {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  animation: poliTickerScroll var(--ticker-duration, 40s) linear infinite;
+  will-change: transform;
+}
+
+.poli-ticker.no-anim {
+  animation: none;
+}
+
+@keyframes poliTickerScroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.poli-ticker-group-title {
+  font-size: 1.2rem;
+  color: var(--display-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+}
+
+.poli-ticker-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.poli-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+}
+
+.poli-ticker-item.poli-called {
+  background: var(--display-accent);
+}
+
+.poli-ticker-item.poli-called .poli-ticker-name,
+.poli-ticker-item.poli-called .poli-ticker-num {
+  color: #1e293b;
+}
+
+.poli-ticker-num {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--display-accent);
+  min-width: 2.2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.2rem 0.4rem;
+}
+
+.poli-ticker-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--display-text);
+  word-break: break-word;
+}
+
+/* Idle poli: 2 kolom — kiri list, kanan video di atas + teks panggilan di bawahnya */
+body.is-idle .poli-main.split {
+  display: grid;
+  grid-template-columns: 24rem 1fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "list video"
+    "list call";
+  gap: 1.5rem;
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.is-idle .poli-list-pane {
+  display: flex;
+  grid-area: list;
+  min-height: 0;
+  max-height: none;
+}
+
+body.is-idle .poli-main.split .video-pane {
+  grid-area: video;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.is-idle .poli-main.split .video-wrap {
+  max-height: 48vh;
+  margin: 0 auto;
+  width: min(100%, calc(48vh * 16 / 9));
+}
+
+body.is-idle .poli-main.split .call-pane {
+  grid-area: call;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+body.is-idle .poli-main.split .current-call {
+  display: block;
+  text-align: center;
+}
+
+body.is-idle .poli-main.split .current-label {
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+  white-space: normal;
+}
+
+body.is-idle .poli-main.split .current-value {
+  font-size: 3.5vw;
+  min-width: 0;
+}
+
+body.is-idle .poli-main.split .current-dir {
+  font-size: 1.6rem;
+  margin-top: 0.5rem;
+  white-space: normal;
+}
+
+/* Calling poli (2 mnt): video di atas, teks panggilan kompak di bawah video, list disembunyikan */
+body.is-calling .poli-main.split {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.2rem;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  justify-content: center;
+}
+
+body.is-calling .poli-main.split .poli-list-pane {
+  display: none;
+}
+
+body.is-calling .poli-main.split .video-pane {
+  flex: 0 0 auto;
+  order: 0;
+  justify-content: center;
+}
+
+body.is-calling .poli-main.split .video-wrap {
+  max-height: 48vh;
+  margin: 0 auto;
+  width: min(100%, calc(48vh * 16 / 9));
+}
+
+body.is-calling .poli-main.split .call-pane {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+body.is-calling .poli-main.split .current-call {
+  text-align: center;
+  animation: callPulse 1.6s ease-in-out 3;
+}
+
+body.is-calling .poli-main.split .current-label {
+  font-size: 1.8rem;
+  margin-bottom: 0.4rem;
+}
+
+body.is-calling .poli-main.split .current-value {
+  font-size: 5vw;
+  line-height: 1.15;
+}
+
+body.is-calling .poli-main.split .current-dir {
+  font-size: 2rem;
+  margin-top: 0.5rem;
+}
+
+body.is-calling .poli-main.split .video-pane.no-video {
+  display: none;
+}
+
 /* ---------- Halaman Display Poli ---------- */
 
 .poli-main {
@@ -742,6 +980,12 @@ body.is-calling .video-pane.no-video {
 }
 
 @media (max-width: 800px) {
+  /* Layar sempit: halaman poli boleh scroll, tumpukan video → teks → list */
+  body:has(.poli-main.split) {
+    height: auto;
+    overflow: visible;
+  }
+
   .action-grid {
     grid-template-columns: 1fr;
   }
@@ -769,6 +1013,51 @@ body.is-calling .video-pane.no-video {
 
   .poli-main {
     grid-template-columns: 1fr;
+  }
+
+  .poli-main.split {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  .poli-list-pane {
+    flex: 1 1 auto;
+    max-height: 40vh;
+  }
+
+  body.is-idle .poli-main.split {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  body.is-idle .poli-main.split .video-pane,
+  body.is-idle .poli-main.split .call-pane,
+  body.is-idle .poli-list-pane {
+    grid-area: auto;
+  }
+
+  body.is-idle .poli-main.split .current-call {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  body.is-idle .poli-main.split .current-label,
+  body.is-idle .poli-main.split .current-dir {
+    white-space: normal;
+  }
+
+  body.is-calling .poli-main.split .video-pane {
+    flex: 0 0 auto;
+    order: 0;
+  }
+
+  body.is-calling .poli-main.split {
+    height: auto;
+    overflow: visible;
   }
 
   .poli-admin-grid {
