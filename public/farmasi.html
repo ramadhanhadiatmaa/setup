@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antrian Pasien Poli - RSU Santa Elisabeth</title>
+  <title>Antrian Farmasi - RSU Santa Elisabeth</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="display-body is-idle">
@@ -17,16 +17,16 @@
   <header class="display-header">
     <div class="brand">
       <span class="brand-title">RSU Santa Elisabeth</span>
-      <span class="brand-sub">Antrian Pasien Poli</span>
+      <span class="brand-sub">Antrian Farmasi</span>
     </div>
     <div class="clock" id="clock"></div>
   </header>
 
   <main class="poli-main split">
-    <aside class="poli-list-pane" id="poliListPane">
-      <h2 class="poli-list-title">Daftar Antrian Poli</h2>
+    <aside class="poli-list-pane" id="farmasiListPane">
+      <h2 class="poli-list-title">Daftar Antrian Farmasi</h2>
       <div class="poli-ticker-viewport">
-        <div class="poli-ticker" id="poliTicker"></div>
+        <div class="poli-ticker" id="farmasiTicker"></div>
       </div>
     </aside>
     <section class="video-pane" id="videoPane">
@@ -36,10 +36,10 @@
       <p class="video-fallback hidden" id="videoFallback">Video belum diatur — hubungi petugas.</p>
     </section>
     <section class="call-pane">
-      <div class="current-call" id="poliCurrentCall">
-        <div class="current-label" id="poliCallLabel">Menunggu Panggilan</div>
-        <div class="current-value" id="poliCallName">&mdash;</div>
-        <div class="current-dir">Silakan menuju ke <span id="poliCallRoom">poli</span></div>
+      <div class="current-call" id="farmasiCurrentCall">
+        <div class="current-label" id="farmasiCallLabel">Menunggu Panggilan</div>
+        <div class="current-value" id="farmasiCallName">&mdash;</div>
+        <div class="current-dir">Silakan menuju ke <span id="farmasiCallRoom">Farmasi</span></div>
       </div>
     </section>
   </main>
@@ -48,7 +48,7 @@
     <button class="btn ghost" id="muteBtn">Nonaktifkan Suara</button>
     <button class="btn ghost" id="replayBtn">Ulangi Panggilan Terakhir</button>
     <a class="btn ghost" href="/">Display Pendaftaran</a>
-    <a class="btn ghost" href="/farmasi">Display Farmasi</a>
+    <a class="btn ghost" href="/poli">Display Poli</a>
     <span class="conn-status" id="connStatus">Menghubungkan...</span>
     <span class="conn-status" id="ttsStatus"></span>
   </footer>
@@ -58,6 +58,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/tts.js"></script>
-  <script src="/js/poli.js"></script>
+  <script src="/js/farmasi.js"></script>
 </body>
 </html>

@@ -3,6 +3,8 @@ let user = null;
 let unsubQueues = null;
 let unsubEvents = null;
 let unsubVideo = null;
+let unsubFarmasiQueue = null;
+let unsubFarmasiCalls = null;
 
 const $ = (id) => document.getElementById(id);
 const hidden = (el) => el.classList.add('hidden');
@@ -128,6 +130,8 @@ function unsubscribeLive() {
   if (unsubQueues) { unsubQueues(); unsubQueues = null; }
   if (unsubEvents) { unsubEvents(); unsubEvents = null; }
   if (unsubVideo) { unsubVideo(); unsubVideo = null; }
+  if (unsubFarmasiQueue) { unsubFarmasiQueue(); unsubFarmasiQueue = null; }
+  if (unsubFarmasiCalls) { unsubFarmasiCalls(); unsubFarmasiCalls = null; }
 }
 
 function renderVideoStatus(rawUrl) {
@@ -135,9 +139,9 @@ function renderVideoStatus(rawUrl) {
   if (!el) return;
   const id = typeof extractYoutubeId === 'function' ? extractYoutubeId(rawUrl) : null;
   if (!rawUrl) {
-    el.textContent = 'Video nonaktif — display hanya menampilkan antrian (pendaftaran & poli).';
+    el.textContent = 'Video nonaktif — display hanya menampilkan antrian (pendaftaran, poli & farmasi).';
   } else if (id) {
-    el.textContent = 'Sedang tayang (ID: ' + id + ') — berlaku di display pendaftaran & poli.';
+    el.textContent = 'Sedang tayang (ID: ' + id + ') — berlaku di display pendaftaran, poli & farmasi.';
   } else {
     el.textContent = 'Tersimpan tapi format tidak dikenali — periksa URL dan simpan ulang.';
   }
@@ -423,6 +427,103 @@ async function callPoliPatient(name, ruangan, btn) {
   }
 }
 
+const farmasiCalledNames = new Set();
+let farmasiQueueData = null;
+
+function renderFarmasiAdmin() {
+  const list = $('farmasiList');
+  if (!list) return;
+  list.innerHTML = '';
+  const patients = farmasiQueueData || [];
+  if (patients.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'poli-empty';
+    li.textContent = farmasiQueueData ? 'Belum ada antrian' : 'Memuat...';
+    list.appendChild(li);
+    return;
+  }
+  patients.forEach((p) => {
+    const li = document.createElement('li');
+    li.className = 'poli-admin-row';
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'poli-admin-name';
+    labelSpan.textContent = (p.nomor > 0 ? p.nomor + '. ' : '') + p.name;
+    const btn = document.createElement('button');
+    btn.className = 'btn poli-admin-btn';
+    const called = farmasiCalledNames.has(p.name);
+    btn.classList.toggle('called', called);
+    btn.textContent = called ? 'Sudah Dipanggil' : 'Panggil';
+    btn.addEventListener('click', () => callFarmasiPatient(p.name, btn));
+    li.append(labelSpan, btn);
+    list.appendChild(li);
+  });
+}
+
+function loadFarmasiAdmin() {
+  if (unsubFarmasiQueue) { unsubFarmasiQueue(); unsubFarmasiQueue = null; }
+  if (unsubFarmasiCalls) { unsubFarmasiCalls(); unsubFarmasiCalls = null; }
+
+  unsubFarmasiQueue = db.collection('antrian_hari_ini')
+    .where('TANGGAL', '==', localDateStr())
+    .onSnapshot((snap) => {
+      const list = [];
+      snap.docs.forEach((doc) => {
+        const d = doc.data();
+        list.push({
+          name: String(d.NAMA || '').trim(),
+          nomor: typeof d.NOMOR === 'number' ? d.NOMOR : 0,
+        });
+      });
+      list.sort((a, b) => a.nomor - b.nomor);
+      farmasiQueueData = list;
+      renderFarmasiAdmin();
+    }, (err) => {
+      showToast('Gagal memuat daftar pasien farmasi: ' + err.message, true);
+    });
+
+  unsubFarmasiCalls = db.collection('farmasi_calls')
+    .where('calledAt', '>=', localMidnight())
+    .onSnapshot((snap) => {
+      farmasiCalledNames.clear();
+      snap.docs.forEach((doc) => {
+        const name = String(doc.data().name || '').trim();
+        if (name) farmasiCalledNames.add(name);
+      });
+      renderFarmasiAdmin();
+    }, () => {});
+}
+
+async function callFarmasiPatient(name, btn) {
+  try {
+    farmasiCalledNames.add(name);
+    renderFarmasiAdmin();
+    await db.collection('farmasi_calls').add({
+      name: name,
+      ruangan: 'Farmasi',
+      calledBy: user.uid,
+      calledAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showToast(name + ' dipanggil ke Farmasi');
+  } catch (err) {
+    farmasiCalledNames.delete(name);
+    renderFarmasiAdmin();
+    showToast(err.message, true);
+  }
+}
+
+async function callFarmasiByName(name) {
+  const cleaned = String(name).trim();
+  if (!cleaned) throw new Error('Masukkan nama pasien terlebih dahulu');
+  if (cleaned.length > 100) throw new Error('Nama terlalu panjang (maks 100 karakter)');
+  await db.collection('farmasi_calls').add({
+    name: cleaned,
+    ruangan: 'Farmasi',
+    calledBy: user.uid,
+    calledAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  return cleaned;
+}
+
 async function deleteExpiredDocs(query) {
   for (;;) {
     const snap = await query.get();
@@ -442,6 +543,12 @@ async function cleanupOldData() {
     );
     await deleteExpiredDocs(
       db.collection('call_events').where('calledAt', '<', localMidnight())
+    );
+    await deleteExpiredDocs(
+      db.collection('poli_calls').where('calledAt', '<', localMidnight())
+    );
+    await deleteExpiredDocs(
+      db.collection('farmasi_calls').where('calledAt', '<', localMidnight())
     );
   } catch (err) {
     console.warn('Pembersihan data lama gagal:', err);
@@ -514,8 +621,19 @@ function bindActions() {
     }
   });
 
+  $('farmasiNameBtn').addEventListener('click', async () => {
+    try {
+      const name = await callFarmasiByName($('farmasiNameInput').value);
+      showToast('Kepada ' + name + ' dipanggil ke Farmasi');
+      $('farmasiNameInput').value = '';
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  });
+
   $('menuPendaftaran').addEventListener('click', () => setTab('pendaftaran'));
   $('menuPoli').addEventListener('click', () => setTab('poli'));
+  $('menuFarmasi').addEventListener('click', () => setTab('farmasi'));
 
   $('videoSaveBtn').addEventListener('click', async () => {
     try {
@@ -538,12 +656,15 @@ function bindActions() {
 }
 
 function setTab(tab) {
+  if (tab !== 'pendaftaran' && tab !== 'poli' && tab !== 'farmasi') tab = 'pendaftaran';
   localStorage.setItem('adminTab', tab);
   $('menuPendaftaran').classList.toggle('active', tab === 'pendaftaran');
   $('menuPoli').classList.toggle('active', tab === 'poli');
+  $('menuFarmasi').classList.toggle('active', tab === 'farmasi');
   hidden($('viewPendaftaran'));
   hidden($('viewPoli'));
-  show(tab === 'pendaftaran' ? $('viewPendaftaran') : $('viewPoli'));
+  hidden($('viewFarmasi'));
+  show(tab === 'pendaftaran' ? $('viewPendaftaran') : tab === 'poli' ? $('viewPoli') : $('viewFarmasi'));
 }
 
 function showFatalError(message) {
@@ -565,7 +686,10 @@ function init() {
         $('userEmail').textContent = u.email;
         setView(true);
         loadPoliAdmin();
-        setTab(localStorage.getItem('adminTab') === 'poli' ? 'poli' : 'pendaftaran');
+        loadFarmasiAdmin();
+        renderFarmasiAdmin();
+        const savedTab = localStorage.getItem('adminTab');
+        setTab(savedTab === 'poli' || savedTab === 'farmasi' ? savedTab : 'pendaftaran');
         if (!cleanupRan) {
           cleanupRan = true;
           cleanupOldData();

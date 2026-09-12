@@ -20,6 +20,10 @@ const CALL_FOCUS_MS = 3 * 60 * 1000;
 // Recall poli = dokumen poli_calls baru sehingga timer otomatis dihitung ulang.
 const POLI_FOCUS_MS = 2 * 60 * 1000;
 
+// Durasi tampilan nama pasien di display farmasi sebelum kembali ke video besar (2 menit).
+// Recall farmasi = dokumen farmasi_calls baru sehingga timer otomatis dihitung ulang.
+const FARMASI_FOCUS_MS = 2 * 60 * 1000;
+
 // Fallback bila dokumen settings/display belum ada. Kosong = video disembunyikan.
 // Ganti video harian TIDAK lewat sini, melainkan via panel admin (Firestore settings/display).
 const DEFAULT_YOUTUBE_URL = '';

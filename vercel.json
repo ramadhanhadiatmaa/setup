@@ -4,6 +4,7 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/display", "destination": "/index.html" },
-    { "source": "/poli", "destination": "/poli.html" }
+    { "source": "/poli", "destination": "/poli.html" },
+    { "source": "/farmasi", "destination": "/farmasi.html" }
   ]
 }

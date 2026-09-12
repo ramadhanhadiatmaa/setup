@@ -41,6 +41,7 @@
     <nav class="admin-menu">
       <button class="admin-menu-item active" id="menuPendaftaran">Pendaftaran</button>
       <button class="admin-menu-item" id="menuPoli">Poli</button>
+      <button class="admin-menu-item" id="menuFarmasi">Farmasi</button>
     </nav>
 
     <div id="viewPendaftaran">
@@ -87,7 +88,7 @@
       </section>
 
       <section class="panel">
-        <h2>Video Display (Pendaftaran & Poli)</h2>
+        <h2>Video Display (Pendaftaran, Poli & Farmasi)</h2>
         <div class="inline-form">
           <input type="text" id="videoUrlInput" placeholder="tempel URL live YouTube atau ID 11 karakter" maxlength="500">
           <button class="btn" id="videoSaveBtn">Simpan Video</button>
@@ -118,6 +119,21 @@
         </section>
       </div>
       <p class="panel-note">Tekan tombol Panggil di samping nama pasien untuk memanggil ke layar Display Poli.</p>
+    </div>
+
+    <div id="viewFarmasi" class="hidden">
+      <section class="panel">
+        <h2>Daftar Antrian Farmasi (urut nomor)</h2>
+        <ul class="poli-admin-list" id="farmasiList"></ul>
+      </section>
+      <section class="panel">
+        <h2>Panggil Berdasarkan Nama</h2>
+        <div class="inline-form">
+          <input type="text" id="farmasiNameInput" placeholder="ketik nama pasien" maxlength="100">
+          <button class="btn" id="farmasiNameBtn">Panggil</button>
+        </div>
+      </section>
+      <p class="panel-note">Tekan tombol Panggil di samping nama pasien untuk memanggil ke layar Display Farmasi.</p>
     </div>
   </div>
 
